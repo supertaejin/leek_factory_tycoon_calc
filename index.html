@@ -231,7 +231,7 @@
 
     <h1>🏭 리크 팩토리 타이쿤</h1>
     <p class="subtitle">
-        각 시설의 실제 생산량(/s)을 입력하면 전체 자원 흐름을 계산합니다.
+        각 시설의 실제 생산량(/s)을 입력하면 전체 자원 흐름을 계산합니다.<br>여러 공장은 <strong>+</strong>로 입력할 수 있습니다. 예: 0.23+0.15+0.08
     </p>
 
     <h2 class="section-title">생산 시설</h2>
@@ -240,58 +240,58 @@
 
         <div class="card">
             <h3>🥬 Leek Soup (/s)</h3>
-            <input type="number" id="rate_soup" value="19660" step="1">
+            <input type="text" inputmode="decimal" id="rate_soup" value="19660" step="1">
         </div>
 
         <div class="card">
             <h3>🍰 Leek Cake (/s)</h3>
-            <input type="number" id="rate_cake" value="1310" step="1">
+            <input type="text" inputmode="decimal" id="rate_cake" value="1310" step="1">
         </div>
 
         <div class="card">
             <h3>⚛️ Atomic Leek (/s)</h3>
-            <input type="number" id="rate_atomic_leek" value="67.63" step="0.01">
+            <input type="text" inputmode="decimal" id="rate_atomic_leek" value="67.63" step="0.01">
         </div>
 
         <div class="card">
             <h3>🛢️ Barrel of Leek (/s)</h3>
-            <input type="number" id="rate_barrel" value="0.73" step="0.01">
+            <input type="text" inputmode="decimal" id="rate_barrel" value="0.73" step="0.01">
         </div>
 
         <div class="card">
             <h3>🌟 Golden Leek (/s)</h3>
-            <input type="number" id="rate_golden" value="4.98" step="0.01">
+            <input type="text" inputmode="decimal" id="rate_golden" value="4.98" step="0.01">
         </div>
 
         <div class="card">
             <h3>🔵 Ultraleek (/s)</h3>
-            <input type="number" id="rate_ultra" value="0.23" step="0.01">
+            <input type="text" inputmode="decimal" id="rate_ultra" value="0.23" step="0.01">
         </div>
 
         <div class="card">
             <h3>🟢 Atomic Chives (/s)</h3>
-            <input type="number" id="rate_chive" value="0.97" step="0.01">
+            <input type="text" inputmode="decimal" id="rate_chive" value="0.97" step="0.01">
         </div>
 
         <div class="card">
             <h3>🟣 Refined Ultraleek (/s)</h3>
-            <input type="number" id="rate_refined" value="0.045" step="0.001">
+            <input type="text" inputmode="decimal" id="rate_refined" value="0.045" step="0.001">
         </div>
 
         <div class="card high">
             <h3>👹 Monster Leek (/s)</h3>
-            <input type="number" id="rate_monster" value="0.0046" step="0.0001">
+            <input type="text" inputmode="decimal" id="rate_monster" value="0.0046" step="0.0001">
         </div>
 
         <div class="card high">
             <h3>👹 Monster Leek XXL (/s)</h3>
-            <input type="number" id="rate_monster_xxl" value="0" step="0.0001">
+            <input type="text" inputmode="decimal" id="rate_monster_xxl" value="0" step="0.0001">
             <div class="hint">새로운 생산 시설</div>
         </div>
 
         <div class="card quantum">
             <h3>⚛️ Quantum Leek (/s)</h3>
-            <input type="number" id="rate_quantum" value="0" step="0.0001">
+            <input type="text" inputmode="decimal" id="rate_quantum" value="0" step="0.0001">
             <div class="hint">최종 생산 시설</div>
         </div>
 
@@ -656,16 +656,37 @@ function formatNumber(num) {
  * ============================================================
  */
 
+function evaluateExpression(expression) {
+    const normalized = expression
+        .replace(/,/g, "")
+        .replace(/\s+/g, "");
+
+    if (!normalized) return 0;
+
+    const parts = normalized.split("+");
+
+    // Only allow positive numbers separated by +
+    if (parts.some(part => !/^\d*\.?\d+$/.test(part))) {
+        return null;
+    }
+
+    return parts.reduce((sum, part) => {
+        return sum + parseFloat(part);
+    }, 0);
+}
+
+
 function getProductionRates() {
 
     const rates = {};
 
     for (const [resource, inputId] of Object.entries(productionInputs)) {
 
-        const value =
-            parseFloat(document.getElementById(inputId).value);
+        const value = evaluateExpression(
+            document.getElementById(inputId).value
+        );
 
-        rates[resource] = Number.isFinite(value) ? value : 0;
+        rates[resource] = value !== null ? value : 0;
     }
 
     return rates;
