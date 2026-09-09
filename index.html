@@ -698,60 +698,32 @@ function getProductionRates() {
  * 흐름 계산
  * ============================================================
  */
-
 function calculateFlow() {
-
     const rates = getProductionRates();
-
-    /*
-     * net:
-     *
-     *   + 생산
-     *   - 소비
-     *
-     */
 
     const net = {};
     const produced = {};
     const consumed = {};
 
-    /*
-     * 모든 자원 초기화
-     */
-
     for (const resource of resourceOrder) {
-
         net[resource] = 0;
         produced[resource] = 0;
         consumed[resource] = 0;
     }
 
-
-    /*
-     * 각 시설의 실제 생산량을 기준으로
-     * 레시피를 적용
-     */
-
     for (const [facility, rate] of Object.entries(rates)) {
-
-        if (rate === 0) {
-            continue;
-        }
+        if (rate === 0) continue;
 
         const recipe = recipes[facility];
+        if (!recipe) continue;
 
-        if (!recipe) {
-            continue;
-        }
+        // 해당 시설이 주 메인 자원(동일한 이름)을 몇 개 생산하는지 확인하여 가동 배율 계산
+        const primaryOutputAmount = recipe.outputs[facility] || 1;
+        const craftRate = rate / primaryOutputAmount;
 
-
-        /*
-         * Input 소비
-         */
-
+        // Input 소비 계산
         for (const [resource, amount] of Object.entries(recipe.inputs)) {
-
-            const value = rate * amount;
+            const value = craftRate * amount;
 
             if (!(resource in consumed)) {
                 consumed[resource] = 0;
@@ -763,14 +735,9 @@ function calculateFlow() {
             net[resource] -= value;
         }
 
-
-        /*
-         * Output 생산
-         */
-
+        // Output 생산 계산 (부산물 포함)
         for (const [resource, amount] of Object.entries(recipe.outputs)) {
-
-            const value = rate * amount;
+            const value = craftRate * amount;
 
             if (!(resource in produced)) {
                 produced[resource] = 0;
@@ -783,10 +750,8 @@ function calculateFlow() {
         }
     }
 
-
     renderResults(net, produced, consumed);
 }
-
 
 /*
  * ============================================================
