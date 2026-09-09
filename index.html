@@ -12,112 +12,103 @@
 
     <h1>🏭 리크 팩토리 타이쿤</h1>
     <p class="subtitle">
-        각 시설의 실제 생산량(/s)을 입력하면 전체 자원 흐름을 계산합니다.<br>여러 공장은 <strong>+</strong>로 입력할 수 있습니다. 예: 0.23+0.15+0.08
+        원하는 <strong>목표 생산량(/s)</strong>을 입력하면 상위 공정에 필요한 하위 자원의 순수 요구량을 계층적으로 계산합니다.
     </p>
 
-    <h2 class="section-title">생산 시설</h2>
+    <h2 class="section-title">자원별 목표 생산량 입력</h2>
 
     <div class="grid">
 
         <div class="card">
             <h3>🥬 Leek (/s)</h3>
             <input type="text" inputmode="decimal" id="rate_leek" value="0" step="1">
+            <div class="hint">직접 생산 목표치</div>
         </div>
 
         <div class="card">
-            <h3>🥬 Leek Soup (/s)</h3>
-            <input type="text" inputmode="decimal" id="rate_soup" value="19660" step="1">
+            <h3>🥣 Leek Soup (/s)</h3>
+            <input type="text" inputmode="decimal" id="rate_soup" value="0" step="1">
+            <div class="hint">직접 생산 목표치</div>
         </div>
 
         <div class="card">
             <h3>🍰 Leek Cake (/s)</h3>
-            <input type="text" inputmode="decimal" id="rate_cake" value="1310" step="1">
+            <input type="text" inputmode="decimal" id="rate_cake" value="0" step="1">
+            <div class="hint">직접 생산 목표치</div>
         </div>
 
         <div class="card">
             <h3>⚛️ Atomic Leek (/s)</h3>
-            <input type="text" inputmode="decimal" id="rate_atomic_leek" value="67.63" step="0.01">
+            <input type="text" inputmode="decimal" id="rate_atomic_leek" value="0" step="0.01">
+            <div class="hint">직접 생산 목표치</div>
         </div>
 
         <div class="card">
             <h3>🛢️ Barrel of Leek (/s)</h3>
-            <input type="text" inputmode="decimal" id="rate_barrel" value="0.73" step="0.01">
+            <input type="text" inputmode="decimal" id="rate_barrel" value="0" step="0.01">
+            <div class="hint">직접 생산 목표치</div>
         </div>
 
         <div class="card">
             <h3>🌟 Golden Leek (/s)</h3>
-            <input type="text" inputmode="decimal" id="rate_golden" value="4.98" step="0.01">
+            <input type="text" inputmode="decimal" id="rate_golden" value="0" step="0.01">
+            <div class="hint">직접 생산 목표치</div>
         </div>
 
         <div class="card">
             <h3>🔵 Ultraleek (/s)</h3>
-            <input type="text" inputmode="decimal" id="rate_ultra" value="0.23" step="0.01">
+            <input type="text" inputmode="decimal" id="rate_ultra" value="0" step="0.01">
+            <div class="hint">직접 생산 목표치</div>
         </div>
 
         <div class="card">
             <h3>🟢 Atomic Chives (/s)</h3>
-            <input type="text" inputmode="decimal" id="rate_chive" value="0.97" step="0.01">
+            <input type="text" inputmode="decimal" id="rate_chive" value="0" step="0.01">
+            <div class="hint">직접 생산 목표치</div>
         </div>
 
         <div class="card">
             <h3>🟣 Refined Ultraleek (/s)</h3>
-            <input type="text" inputmode="decimal" id="rate_refined" value="0.045" step="0.001">
+            <input type="text" inputmode="decimal" id="rate_refined" value="0" step="0.001">
+            <div class="hint">직접 생산 목표치</div>
         </div>
 
         <div class="card high">
             <h3>👹 Monster Leek (/s)</h3>
-            <input type="text" inputmode="decimal" id="rate_monster" value="0.0046" step="0.0001">
+            <input type="text" inputmode="decimal" id="rate_monster" value="0.0034" step="0.0001">
+            <div class="hint">목표 설정 가능</div>
         </div>
 
         <div class="card high">
             <h3>👹 Monster Leek XXL (/s)</h3>
             <input type="text" inputmode="decimal" id="rate_monster_xxl" value="0" step="0.0001">
-            <div class="hint">새로운 생산 시설</div>
+            <div class="hint">목표 설정 가능</div>
         </div>
 
         <div class="card quantum">
             <h3>⚛️ Quantum Leek (/s)</h3>
             <input type="text" inputmode="decimal" id="rate_quantum" value="0" step="0.0001">
-            <div class="hint">최종 생산 시설</div>
+            <div class="hint">최종 목표 자원</div>
         </div>
 
     </div>
 
     <button id="calcBtn">
-        📊 실시간 흐름 분석하기
+        📊 계층적 필요 생산량 계산하기
     </button>
 
     <div class="results" id="resultsSection">
 
-        <h2>📊 분석 결과</h2>
-
-        <div class="summary">
-
-            <div class="summary-card deficit-box">
-                <div>⚠️ 부족</div>
-                <div class="number deficit" id="deficitCount">0</div>
-            </div>
-
-            <div class="summary-card balance-box">
-                <div>⚖️ 균형</div>
-                <div class="number balanced" id="balanceCount">0</div>
-            </div>
-
-            <div class="summary-card surplus-box">
-                <div>✅ 잉여</div>
-                <div class="number surplus" id="surplusCount">0</div>
-            </div>
-
-        </div>
+        <h2>📊 분석 결과 (하위 요구량 계산)</h2>
 
         <table>
             <thead>
                 <tr>
                     <th>자원</th>
-                    <th>생산/s</th>
-                    <th>소비/s</th>
-                    <th>순 변화/s</th>
-                    <th>상태</th>
+                    <th>직접 목표/s</th>
+                    <th>상위 공정 소모 요구/s</th>
+                    <th>부산물 환원/s</th>
+                    <th>최종 필요 생산량/s</th>
                 </tr>
             </thead>
 
@@ -157,7 +148,7 @@
 
                 <div>
                     <strong>Ultraleek</strong> :
-                    Golden Leek × 1 + Atomic Leek × 20 +
+                    Golden Leek × 10 + Atomic Leek × 20 +
                     Leek Soup × 1,000 + Barrel × 0.4
                     → Ultraleek × 1 + Leek × 100,000
                 </div>
