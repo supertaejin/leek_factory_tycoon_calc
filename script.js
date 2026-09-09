@@ -70,7 +70,6 @@ const productionInputs = {
     "Quantum Leek": "rate_quantum"
 };
 
-// 최상위 -> 최하위 순서 (역산 및 처리 순서)
 const resourceOrderTopDown = [
     "Quantum Leek",
     "Monster Leek XXL",
@@ -86,7 +85,6 @@ const resourceOrderTopDown = [
     "Leek"
 ];
 
-// 화면 표시 순서 (기초 -> 최종 자원)
 const resourceOrderDisplay = [...resourceOrderTopDown].reverse();
 
 function formatNumber(num) {
@@ -114,22 +112,22 @@ function getTargetRates() {
     const rates = {};
     for (const [resource, inputId] of Object.entries(productionInputs)) {
         const inputElem = document.getElementById(inputId);
-        if (!inputElem) continue;
+        if (!inputElem) {
+            rates[resource] = 0;
+            continue;
+        }
         const value = evaluateExpression(inputElem.value);
         rates[resource] = value !== null ? value : 0;
     }
     return rates;
 }
 
-/*
- * 계층적 요구량 계산 핵심 함수
- */
 function calculateHierarchicalFlow() {
     const userTargets = getTargetRates();
 
-    const requiredProduction = {}; // 각 자원의 최종 총 요구 생산량(/s)
-    const consumedByUpper = {};    // 상위 티어 생산으로 인해 소모되는 양(/s)
-    const byproductProduced = {};  // 하위 공정에서 부산물로 다시 되돌아오는 양(/s)
+    const requiredProduction = {};
+    const consumedByUpper = {};
+    const byproductProduced = {};
 
     for (const res of resourceOrderTopDown) {
         requiredProduction[res] = 0;
@@ -137,29 +135,23 @@ function calculateHierarchicalFlow() {
         byproductProduced[res] = 0;
     }
 
-    // 최상위 자원부터 계층적으로 내려가며 소비량/부산물 역산
     for (const res of resourceOrderTopDown) {
-        // 이 자원의 총 필요 생산량 = 사용자가 직접 설정한 목표량 + 상위 자원이 요청한 소비량 - 부산물 반환량
         const directTarget = userTargets[res] || 0;
         const rawNeeded = directTarget + consumedByUpper[res] - byproductProduced[res];
         
-        // 생산량은 음수가 될 수 없음
         const netProductionNeeded = Math.max(0, rawNeeded);
         requiredProduction[res] = netProductionNeeded;
 
         const recipe = recipes[res];
         if (!recipe || netProductionNeeded === 0) continue;
 
-        // 메인 Output 단위 기준 공정 가동 횟수(craftRate)
         const mainOutputQty = recipe.outputs[res] || 1;
         const craftRate = netProductionNeeded / mainOutputQty;
 
-        // 1. 하위 자원 소비량 요구 전달
         for (const [inRes, qty] of Object.entries(recipe.inputs)) {
             consumedByUpper[inRes] = (consumedByUpper[inRes] || 0) + (craftRate * qty);
         }
 
-        // 2. 부산물(Byproduct) 발생 전달 (메인 자원 제외)
         for (const [outRes, qty] of Object.entries(recipe.outputs)) {
             if (outRes !== res) {
                 byproductProduced[outRes] = (byproductProduced[outRes] || 0) + (craftRate * qty);
@@ -175,15 +167,11 @@ function renderHierarchicalResults(targets, upperConsumption, byproducts, finalN
     if (!tbody) return;
     tbody.innerHTML = "";
 
-    let totalTargetCount = 0;
-
     for (const resource of resourceOrderDisplay) {
         const target = targets[resource] || 0;
         const upperCons = upperConsumption[resource] || 0;
         const byproduct = byproducts[resource] || 0;
         const totalNeeded = finalNeeded[resource] || 0;
-
-        if (totalNeeded > 0) totalTargetCount++;
 
         const row = document.createElement("tr");
 
@@ -204,17 +192,36 @@ function renderHierarchicalResults(targets, upperConsumption, byproducts, finalN
     if (resultsSection) resultsSection.style.display = "block";
 }
 
-document.addEventListener("DOMContentLoaded", function() {
-    const calcBtn = document.getElementById("calcBtn");
-    if (calcBtn) {
-        calcBtn.addEventListener("click", calculateHierarchicalFlow);
+function renderRecipes() {
+    const recipeContainer = document.getElementById("recipeList");
+    if (!recipeContainer) return;
+
+    recipeContainer.innerHTML = "";
+
+    for (const [facility, recipe] of Object.entries(recipes)) {
+        if (Object.keys(recipe.inputs).length === 0) continue;
+
+        const inputsStr = Object.entries(recipe.inputs)
+            .map(([item, qty]) => `${item} × ${formatNumber(qty)}`)
+            .join(" + ");
+
+        const outputsStr = Object.entries(recipe.outputs)
+            .map(([item, qty]) => `${item} × ${formatNumber(qty)}`)
+            .join(" + ");
+
+        const itemDiv = document.createElement("div");
+        itemDiv.innerHTML = `<strong>${facility}</strong> : ${inputsStr} → ${outputsStr}`;
+        recipeContainer.appendChild(itemDiv);
     }
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    renderRecipes();
+    calculateHierarchicalFlow();
 
     document.addEventListener("keydown", function(event) {
         if (event.key === "Enter") {
             calculateHierarchicalFlow();
         }
     });
-
-    calculateHierarchicalFlow();
 });
