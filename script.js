@@ -1,146 +1,59 @@
 /*
  * ============================================================
- * Leek Factory Tycoon - Recipe Data
+ * Leek Factory Tycoon - Recipe Data & Target Calculator
  * ============================================================
  */
 
 const recipes = {
-
     "Leek": {
         inputs: {},
-        outputs: {
-            "Leek": 1
-        }
+        outputs: { "Leek": 1 }
     },
-
     "Leek Soup": {
-        inputs: {
-            "Leek": 10
-        },
-        outputs: {
-            "Leek Soup": 1
-        }
+        inputs: { "Leek": 10 },
+        outputs: { "Leek Soup": 1 }
     },
-
     "Leek Cake": {
-        inputs: {
-            "Leek Soup": 10
-        },
-        outputs: {
-            "Leek Cake": 1
-        }
+        inputs: { "Leek Soup": 10 },
+        outputs: { "Leek Cake": 1 }
     },
-
     "Atomic Leek": {
-        inputs: {
-            "Leek Cake": 10,
-            "Leek Soup": 25
-        },
-        outputs: {
-            "Atomic Leek": 1
-        }
+        inputs: { "Leek Cake": 10, "Leek Soup": 25 },
+        outputs: { "Atomic Leek": 1 }
     },
-
     "Barrel of Leek": {
-        inputs: {
-            "Leek": 10000
-        },
-        outputs: {
-            "Barrel of Leek": 1
-        }
+        inputs: { "Leek": 10000 },
+        outputs: { "Barrel of Leek": 1 }
     },
-
     "Golden Leek": {
-        inputs: {
-            "Atomic Leek": 10,
-            "Leek Cake": 50,
-            "Barrel of Leek": 0.2
-        },
-        outputs: {
-            "Golden Leek": 1,
-            "Leek Soup": 500
-        }
+        inputs: { "Atomic Leek": 10, "Leek Cake": 50, "Barrel of Leek": 0.2 },
+        outputs: { "Golden Leek": 1, "Leek Soup": 500 }
     },
-
     "Ultraleek": {
-        inputs: {
-            "Golden Leek": 1,
-            "Atomic Leek": 20,
-            "Leek Soup": 1000,
-            "Barrel of Leek": 0.4
-        },
-        outputs: {
-            "Ultraleek": 1,
-            "Leek": 100000
-        }
+        inputs: { "Golden Leek": 10, "Atomic Leek": 20, "Leek Soup": 1000, "Barrel of Leek": 0.4 },
+        outputs: { "Ultraleek": 1, "Leek": 100000 }
     },
-
     "Atomic Chives": {
-        inputs: {
-            "Barrel of Leek": 2,
-            "Atomic Leek": 20
-        },
-        outputs: {
-            "Atomic Chives": 1
-        }
+        inputs: { "Barrel of Leek": 2, "Atomic Leek": 20 },
+        outputs: { "Atomic Chives": 1 }
     },
-
     "Refined Ultraleek": {
-        inputs: {
-            "Ultraleek": 5,
-            "Atomic Chives": 20,
-            "Leek": 1000000
-        },
-        outputs: {
-            "Refined Ultraleek": 1,
-            "Barrel of Leek": 100
-        }
+        inputs: { "Ultraleek": 5, "Atomic Chives": 20, "Leek": 1000000 },
+        outputs: { "Refined Ultraleek": 1, "Barrel of Leek": 100 }
     },
-
     "Monster Leek": {
-        inputs: {
-            "Refined Ultraleek": 10,
-            "Ultraleek": 50,
-            "Golden Leek": 500,
-            "Leek": 10000000
-        },
-        outputs: {
-            "Monster Leek": 1
-        }
+        inputs: { "Refined Ultraleek": 10, "Ultraleek": 50, "Golden Leek": 500, "Leek": 10000000 },
+        outputs: { "Monster Leek": 1 }
     },
-
     "Monster Leek XXL": {
-        inputs: {
-            "Monster Leek": 50,
-            "Refined Ultraleek": 1000,
-            "Ultraleek": 15000,
-            "Atomic Leek": 1000000
-        },
-        outputs: {
-            "Monster Leek XXL": 1
-        }
+        inputs: { "Monster Leek": 50, "Refined Ultraleek": 1000, "Ultraleek": 15000, "Atomic Leek": 1000000 },
+        outputs: { "Monster Leek XXL": 1 }
     },
-
     "Quantum Leek": {
-        inputs: {
-            "Monster Leek XXL": 75,
-            "Monster Leek": 10000,
-            "Atomic Chives": 5000000,
-            "Refined Ultraleek": 150000,
-            "Ultraleek": 2000000
-        },
-        outputs: {
-            "Quantum Leek": 1
-        }
+        inputs: { "Monster Leek XXL": 75, "Monster Leek": 10000, "Atomic Chives": 5000000, "Refined Ultraleek": 150000, "Ultraleek": 2000000 },
+        outputs: { "Quantum Leek": 1 }
     }
 };
-
-
-/*
- * ============================================================
- * 시설별 생산량 입력 ID 맵
- * ============================================================
- */
 
 const productionInputs = {
     "Leek": "rate_leek",
@@ -157,242 +70,151 @@ const productionInputs = {
     "Quantum Leek": "rate_quantum"
 };
 
-
-/*
- * ============================================================
- * 표시 순서
- * ============================================================
- */
-
-const resourceOrder = [
-    "Leek",
-    "Leek Soup",
-    "Leek Cake",
-    "Atomic Leek",
-    "Barrel of Leek",
-    "Golden Leek",
-    "Ultraleek",
-    "Atomic Chives",
-    "Refined Ultraleek",
-    "Monster Leek",
+// 최상위 -> 최하위 순서 (역산 및 처리 순서)
+const resourceOrderTopDown = [
+    "Quantum Leek",
     "Monster Leek XXL",
-    "Quantum Leek"
+    "Monster Leek",
+    "Refined Ultraleek",
+    "Atomic Chives",
+    "Ultraleek",
+    "Golden Leek",
+    "Barrel of Leek",
+    "Atomic Leek",
+    "Leek Cake",
+    "Leek Soup",
+    "Leek"
 ];
 
-
-/*
- * ============================================================
- * 숫자 포맷팅
- * ============================================================
- */
+// 화면 표시 순서 (기초 -> 최종 자원)
+const resourceOrderDisplay = [...resourceOrderTopDown].reverse();
 
 function formatNumber(num) {
     const abs = Math.abs(num);
-
-    if (abs >= 1000000000) {
-        return (num / 1000000000).toFixed(2) + "B";
-    }
-
-    if (abs >= 1000000) {
-        return (num / 1000000).toFixed(2) + "M";
-    }
-
-    if (abs >= 1000) {
-        return (num / 1000).toFixed(2) + "K";
-    }
-
-    if (abs >= 1) {
-        return num.toFixed(2);
-    }
-
+    if (abs >= 1000000000) return (num / 1000000000).toFixed(2) + "B";
+    if (abs >= 1000000) return (num / 1000000).toFixed(2) + "M";
+    if (abs >= 1000) return (num / 1000).toFixed(2) + "K";
+    if (abs >= 1) return num.toFixed(2);
     return num.toFixed(4);
 }
 
-
-/*
- * ============================================================
- * 입력식 평가 (예: 0.1 + 0.2)
- * ============================================================
- */
-
 function evaluateExpression(expression) {
-    const normalized = expression
-        .replace(/,/g, "")
-        .replace(/\s+/g, "");
-
+    if (!expression) return 0;
+    const normalized = expression.replace(/,/g, "").replace(/\s+/g, "");
     if (!normalized) return 0;
 
     const parts = normalized.split("+");
-
     if (parts.some(part => !/^\d*\.?\d+$/.test(part))) {
         return null;
     }
-
-    return parts.reduce((sum, part) => {
-        return sum + parseFloat(part);
-    }, 0);
+    return parts.reduce((sum, part) => sum + parseFloat(part), 0);
 }
 
-
-function getProductionRates() {
+function getTargetRates() {
     const rates = {};
-
     for (const [resource, inputId] of Object.entries(productionInputs)) {
         const inputElem = document.getElementById(inputId);
         if (!inputElem) continue;
-
         const value = evaluateExpression(inputElem.value);
         rates[resource] = value !== null ? value : 0;
     }
-
     return rates;
 }
 
-
 /*
- * ============================================================
- * 흐름 계산
- * ============================================================
+ * 계층적 요구량 계산 핵심 함수
  */
+function calculateHierarchicalFlow() {
+    const userTargets = getTargetRates();
 
-function calculateFlow() {
-    const rates = getProductionRates();
+    const requiredProduction = {}; // 각 자원의 최종 총 요구 생산량(/s)
+    const consumedByUpper = {};    // 상위 티어 생산으로 인해 소모되는 양(/s)
+    const byproductProduced = {};  // 하위 공정에서 부산물로 다시 되돌아오는 양(/s)
 
-    const net = {};
-    const produced = {};
-    const consumed = {};
-
-    for (const resource of resourceOrder) {
-        net[resource] = 0;
-        produced[resource] = 0;
-        consumed[resource] = 0;
+    for (const res of resourceOrderTopDown) {
+        requiredProduction[res] = 0;
+        consumedByUpper[res] = 0;
+        byproductProduced[res] = 0;
     }
 
-    for (const [facility, rate] of Object.entries(rates)) {
-        if (rate === 0) continue;
+    // 최상위 자원부터 계층적으로 내려가며 소비량/부산물 역산
+    for (const res of resourceOrderTopDown) {
+        // 이 자원의 총 필요 생산량 = 사용자가 직접 설정한 목표량 + 상위 자원이 요청한 소비량 - 부산물 반환량
+        const directTarget = userTargets[res] || 0;
+        const rawNeeded = directTarget + consumedByUpper[res] - byproductProduced[res];
+        
+        // 생산량은 음수가 될 수 없음
+        const netProductionNeeded = Math.max(0, rawNeeded);
+        requiredProduction[res] = netProductionNeeded;
 
-        const recipe = recipes[facility];
-        if (!recipe) continue;
+        const recipe = recipes[res];
+        if (!recipe || netProductionNeeded === 0) continue;
 
-        // 메인 Output 단위 생산량 기준 가동 배율(crafting rate) 계산
-        const primaryOutputAmount = recipe.outputs[facility] || 1;
-        const craftRate = rate / primaryOutputAmount;
+        // 메인 Output 단위 기준 공정 가동 횟수(craftRate)
+        const mainOutputQty = recipe.outputs[res] || 1;
+        const craftRate = netProductionNeeded / mainOutputQty;
 
-        // Input 소비 계산
-        for (const [resource, amount] of Object.entries(recipe.inputs)) {
-            const value = craftRate * amount;
-
-            if (!(resource in consumed)) {
-                consumed[resource] = 0;
-                produced[resource] = 0;
-                net[resource] = 0;
-            }
-
-            consumed[resource] += value;
-            net[resource] -= value;
+        // 1. 하위 자원 소비량 요구 전달
+        for (const [inRes, qty] of Object.entries(recipe.inputs)) {
+            consumedByUpper[inRes] = (consumedByUpper[inRes] || 0) + (craftRate * qty);
         }
 
-        // Output 생산 계산 (부산물 포함)
-        for (const [resource, amount] of Object.entries(recipe.outputs)) {
-            const value = craftRate * amount;
-
-            if (!(resource in produced)) {
-                produced[resource] = 0;
-                consumed[resource] = 0;
-                net[resource] = 0;
+        // 2. 부산물(Byproduct) 발생 전달 (메인 자원 제외)
+        for (const [outRes, qty] of Object.entries(recipe.outputs)) {
+            if (outRes !== res) {
+                byproductProduced[outRes] = (byproductProduced[outRes] || 0) + (craftRate * qty);
             }
-
-            produced[resource] += value;
-            net[resource] += value;
         }
     }
 
-    renderResults(net, produced, consumed);
+    renderHierarchicalResults(userTargets, consumedByUpper, byproductProduced, requiredProduction);
 }
 
-
-/*
- * ============================================================
- * 결과 화면 표시
- * ============================================================
- */
-
-function renderResults(net, produced, consumed) {
+function renderHierarchicalResults(targets, upperConsumption, byproducts, finalNeeded) {
     const tbody = document.getElementById("resultBody");
+    if (!tbody) return;
     tbody.innerHTML = "";
 
-    let deficitCount = 0;
-    let surplusCount = 0;
-    let balanceCount = 0;
+    let totalTargetCount = 0;
 
-    for (const resource of resourceOrder) {
-        const flow = net[resource] || 0;
-        const prod = produced[resource] || 0;
-        const cons = consumed[resource] || 0;
+    for (const resource of resourceOrderDisplay) {
+        const target = targets[resource] || 0;
+        const upperCons = upperConsumption[resource] || 0;
+        const byproduct = byproducts[resource] || 0;
+        const totalNeeded = finalNeeded[resource] || 0;
 
-        let statusClass;
-        let statusText;
-
-        const epsilon = 0.0000001;
-
-        if (Math.abs(flow) < epsilon) {
-            statusClass = "balanced";
-            statusText = "⚖️ 균형";
-            balanceCount++;
-        } else if (flow < 0) {
-            statusClass = "deficit";
-            statusText = "⚠️ 부족";
-            deficitCount++;
-        } else {
-            statusClass = "surplus";
-            statusText = "✅ 잉여";
-            surplusCount++;
-        }
+        if (totalNeeded > 0) totalTargetCount++;
 
         const row = document.createElement("tr");
 
         row.innerHTML = `
             <td><strong>${resource}</strong></td>
-            <td>${formatNumber(prod)}/s</td>
-            <td>${formatNumber(cons)}/s</td>
-            <td class="${statusClass}">
-                ${flow >= 0 ? "+" : ""}${formatNumber(flow)}/s
-            </td>
-            <td class="${statusClass}">
-                ${statusText}
+            <td>${formatNumber(target)}/s</td>
+            <td>${formatNumber(upperCons)}/s</td>
+            <td style="color: #27ae60;">${byproduct > 0 ? "-" + formatNumber(byproduct) : "0"}/s</td>
+            <td style="font-weight: bold; color: #2c3e50;">
+                ${formatNumber(totalNeeded)}/s
             </td>
         `;
 
         tbody.appendChild(row);
     }
 
-    document.getElementById("deficitCount").textContent = deficitCount;
-    document.getElementById("balanceCount").textContent = balanceCount;
-    document.getElementById("surplusCount").textContent = surplusCount;
-    document.getElementById("resultsSection").style.display = "block";
+    const resultsSection = document.getElementById("resultsSection");
+    if (resultsSection) resultsSection.style.display = "block";
 }
 
-
-/*
- * ============================================================
- * 이벤트 리스너 등록 및 초기 실행
- * ============================================================
- */
-
 document.addEventListener("DOMContentLoaded", function() {
-    // 버튼 클릭 이벤트
     const calcBtn = document.getElementById("calcBtn");
     if (calcBtn) {
-        calcBtn.addEventListener("click", calculateFlow);
+        calcBtn.addEventListener("click", calculateHierarchicalFlow);
     }
 
-    // Enter 키 입력 이벤트
     document.addEventListener("keydown", function(event) {
         if (event.key === "Enter") {
-            calculateFlow();
+            calculateHierarchicalFlow();
         }
     });
 
-    // 페이지 로드시 바로 최초 계산
-    calculateFlow();
+    calculateHierarchicalFlow();
 });
